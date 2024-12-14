@@ -1,3 +1,10 @@
+@push('endHead')
+<style>
+    .form-buttons{
+        position: relative !important;
+    }
+</style>
+@endpush
 <x-mailcoach::layout
     :originTitle="$originTitle ?? $campaign->name"
     :originHref="$originHref ?? null"

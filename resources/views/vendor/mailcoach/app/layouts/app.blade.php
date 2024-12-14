@@ -47,7 +47,7 @@
 
     <main class="md:pt-10 relative z-1 w-full px-4.5 sm:px-8">
 
-        <div class="flex-grow md:flex md:items-stretch md:gap-10 @unless(isset($fullWidth) && $fullWidth) max-w-layout mx-auto @endunless">
+        <div class="flex-grow md:flex md:items-stretch md:gap-10 @unless(isset($fullWidth) && $fullWidth) max-w-full mx-auto @endunless">
             @unless(isset($hideNav) && $hideNav)
                 <div class="sm:hidden mt-6">
                     @include('mailcoach::app.partials.header')
@@ -55,7 +55,7 @@
                 @isset($nav)
                     <nav class="
                         mb-4 bg-white p-4.5 rounded-xl flex-shrink-0
-                        sm:-mt-2 sm:w-[13rem] sm:bg-transparent sm:p-0
+                        sm:-mt-2 sm:w-[11rem] sm:bg-transparent sm:p-0
                         md:my-0
                     ">
                         {{ $nav }}

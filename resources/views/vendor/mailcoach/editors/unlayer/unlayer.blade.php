@@ -118,7 +118,7 @@
             json: @entangle('templateFieldValues.json').live,
             init: init{{ $model->id }},
         }" class="overflow-hidden flex-1 h-full mb-6">
-            <div id="editor{{ $model->id }}" class="h-full pr-3 py-1" style="min-height: 75vh; height: 75vh"></div>
+            <div id="editor{{ $model->id }}" class="h-full pr-3 py-1" style="min-height: 90vh; height: 90vh;"></div>
         </div>
 
         @isset($errors)

@@ -1,6 +1,6 @@
 @php use Spatie\Mailcoach\MainNavigation; @endphp
 <header class="w-full border-b border-sand p-3.5 lg:p-8 text-sm relative">
-    <nav class="max-w-layout mx-auto">
+    <nav class="max-w-full mx-auto">
         <div class="flex items-center gap-x-4 lg:gap-x-10 gap-y-6">
             <div class="flex items-center">
                 <a wire:navigate href="{{ route(config('mailcoach.redirect_home')) }}" class="flex items-center group">
