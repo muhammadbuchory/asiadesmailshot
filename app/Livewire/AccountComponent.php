@@ -33,9 +33,9 @@ class AccountComponent extends Component implements HasForms, HasActions
 
     public function mount()
     {
-        $this->email = Auth::user()->email;
-        $this->name = Auth::user()->name;
-    }
+            $this->email = Auth::user()->email;
+            $this->name = Auth::user()->name;
+        }
 
     public function save()
     {

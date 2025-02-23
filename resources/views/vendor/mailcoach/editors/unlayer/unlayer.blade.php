@@ -5,7 +5,7 @@
             let slug = document.getElementById('unlayer_template').value;
             slug = slug.split('/').slice(-1)[0];
 
-            fetch('https://api.graphql.unlayer.com/graphql', {
+            fetch('/unlayer-template/' + slug, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -27,6 +27,7 @@
             })
                 .then((res) => res.json())
                 .then((result) => {
+                    console.log(res);
                     if (! result.data.StockTemplate) {
                         @if (config('mailcoach.unlayer.options.projectId'))
                         window.editor{{ $model->id }}.loadTemplate(slug);

@@ -9,11 +9,12 @@ use Filament\Tables\Columns\TextColumn;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Spatie\Mailcoach\Livewire\TableComponent;
+use Spatie\Mailcoach\MainNavigation;
 
 class UsersComponent extends TableComponent
 {
     public function getTitle(): string
-    {
+    {   
         return __mc('Users');
     }
 

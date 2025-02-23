@@ -50,6 +50,8 @@
                     </div>
                 </div>
 
+
+                
                 <div class="form-grid" wire:ignore x-show="!collapsed" x-collapse>
                     <form
                         class="card-grid"
@@ -62,8 +64,9 @@
                         @csrf
 
                         <x-mailcoach::text-field :label="__mc('Subject')" name="subject" wire:model="content.{{ $contentItem->uuid }}.subject" />
+                        <x-mailcoach::text-field :label="__mc('Preview Text')" name="preview_text" wire:model="content.{{ $contentItem->uuid }}.preview_text" />
                     </form>
-
+                    {{-- @dd($contentItem) --}}
                     @livewire(config('mailcoach.content_editor'), [
                         'model' => $contentItem,
                     ])

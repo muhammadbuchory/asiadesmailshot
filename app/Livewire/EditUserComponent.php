@@ -30,6 +30,8 @@ class EditUserComponent extends Component
 
     public function save(): void
     {
+        $this->validate();
+
         $this->user->email = $this->email;
         $this->user->name = $this->name;
         $this->user->save();
