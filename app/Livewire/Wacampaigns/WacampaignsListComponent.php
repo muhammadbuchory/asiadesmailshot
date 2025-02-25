@@ -81,12 +81,12 @@ class WacampaignsListComponent extends TableComponent
                 ->searchable()
                 ->size('base')
                 ->extraAttributes(['class' => 'link']),
-            TextColumn::make('List')
+            TextColumn::make('list')
                 ->url(fn ($record) => $record->emailList
                     ? route('mailcoach.emailLists.summary', $record->emailList)
                     : null
                 )
-                ->view('mailcoach::app.campaigns.columns.email_list'),
+                ->view('livewire.wacampaigns.partials.email_list'),
             TextColumn::make('status')
                 ->getStateUsing(fn ($record) => match (true) {
                     default => $record->status->getLabel(),
