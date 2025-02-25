@@ -3,6 +3,7 @@ namespace App\Http\Controllers\Extended;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Models\Wa_campaigns;
 use App\Models\Wa_outbox;
 
 class SendingWaController
@@ -27,9 +28,6 @@ class SendingWaController
         ->limit(50)
         ->get();
   
-
-    
-
     foreach ($list as $list) {
       if($list->new_file != "" || $list->old_file != ""){
         $url = "https://notifapi.com/send_image_url";
@@ -70,6 +68,9 @@ class SendingWaController
       $res = curl_exec($ch);
       $waoutbox = Wa_outbox::find($list->outbox_id);
       $waoutbox->response = $res;
+      if($res == "phone_no empty"){
+        continue;
+      }
       if(json_decode($res)->code == "200"){
         $waoutbox->status = "sent";
       }else{
@@ -81,7 +82,27 @@ class SendingWaController
       curl_close($ch);
     }
 
-    return "finish";
+    $campaigns = DB::table('wa_campaigns AS campaigns')
+    ->leftJoin(DB::raw('(SELECT wa_campaigns_id, COUNT(*) AS count FROM wa_outbox WHERE status = "waiting" GROUP BY wa_campaigns_id) AS outbox'), 'outbox.wa_campaigns_id', '=', 'campaigns.id')
+    ->select('campaigns.id', DB::raw('IFNULL(outbox.count, 0) AS count'))
+    ->where('campaigns.status','=', 'sending')
+    ->get();
+
+    if(count($campaigns) > 0){
+      echo "check wa campaigns \n";
+      foreach ($campaigns as $campaigns) {
+        Wa_campaigns::where('id', $campaigns->id)
+        ->update([
+            'status' => 'sent',
+            'sent_at' => now()
+        ]);
+      }
+      echo "finish wa campaigns \n";
+    }
+
+    
+    
+
   }
 
 }

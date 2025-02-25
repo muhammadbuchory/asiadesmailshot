@@ -18,6 +18,8 @@ class WacampaignsContentComponent extends Component
     public ?string $type;
     public $file;
 
+
+
     public function rules(): array
     {
         return [
@@ -78,6 +80,13 @@ class WacampaignsContentComponent extends Component
             $this->wacampaigns->type = $this->watemplates->type;
             $this->wacampaigns->save();
         }
+
+        notify(__mc('The Wa campaigns content has been updated.'));
+    }
+
+    public function sendTest(): void
+    {
+        dd("sendtest");
 
         notify(__mc('The Wa campaigns content has been updated.'));
     }

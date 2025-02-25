@@ -59,7 +59,7 @@ class WacampaignsDeliveryComponent extends Component
                 $waoutbox->phone = $list->extra_attributes['phone'];
                 $waoutbox->status = "waiting";
             }else{
-                $waoutbox->response = "Not valid phone number";
+                $waoutbox->response = "Not a valid phone number";
                 $waoutbox->status = "failed";
             }
             $waoutbox->save();

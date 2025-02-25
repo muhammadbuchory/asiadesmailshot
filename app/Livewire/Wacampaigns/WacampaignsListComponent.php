@@ -6,9 +6,17 @@ namespace App\Livewire\Wacampaigns;
 // use Illuminate\Http\Request;
 use App\Models\Wa_campaigns;
 use Closure;
+use Illuminate\Support\Str;
+use Filament\Support\Colors\Color;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Actions\BulkAction;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Grouping\Group;
+use Filament\Tables;
+use Filament\Tables\Table;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Spatie\Mailcoach\Domain\Template\Models\Template;
 use Spatie\Mailcoach\Livewire\TableComponent;
@@ -20,9 +28,49 @@ class WacampaignsListComponent extends TableComponent
         return Wa_campaigns::query();
     }
 
-    protected function getDefaultTableSortColumn(): ?string
+    protected function getDefaultTableSortDirection(): ?string
     {
-        return 'name';
+        return 'asc';
+    }
+
+    public function getTableGroupingDirection(): ?string
+    {
+        return $this->getTableSortDirection() ?? 'asc';
+    }
+
+    public function getTableGrouping(): ?Group
+    {
+        return Group::make('status')
+            ->getTitleFromRecordUsing(function ($record) {
+                return match (true) {
+                    $record->status->getLabel() === 'Sending' => __mc('Sending'),
+                    // $record->status === CampaignStatus::Draft && $record->scheduled_at => __mc('Scheduled'),
+                    $record->status->getLabel() === 'Draft' => __mc('Draft'),
+                    $record->status->getLabel() === 'Sent' => __mc('Sent Wa Campaigns'),
+                    default => '',
+                };
+            })
+            ->label('');
+    }
+
+    // protected function getDefaultTableSortColumn(): ?string
+    // {
+    //     return 'name';
+    // }
+
+    protected function getTableBulkActions(): array
+    {
+        return [
+            BulkAction::make('delete')
+                ->requiresConfirmation()
+                ->icon('heroicon-s-trash')
+                ->color('danger')
+                ->deselectRecordsAfterCompletion()
+                ->action(function ($records) {
+                    $records->each->delete();
+                    notify(__mc('Campaigns successfully deleted.'));
+                }),
+        ];
     }
 
     protected function getTableColumns(): array
@@ -33,6 +81,12 @@ class WacampaignsListComponent extends TableComponent
                 ->searchable()
                 ->size('base')
                 ->extraAttributes(['class' => 'link']),
+            TextColumn::make('List')
+                ->url(fn ($record) => $record->emailList
+                    ? route('mailcoach.emailLists.summary', $record->emailList)
+                    : null
+                )
+                ->view('mailcoach::app.campaigns.columns.email_list'),
             TextColumn::make('status')
                 ->getStateUsing(fn ($record) => match (true) {
                     default => $record->status->getLabel(),
@@ -41,7 +95,7 @@ class WacampaignsListComponent extends TableComponent
                 ->searchable()
                 ->size('base'),
         ];
-    }
+    }   
 
     protected function getTableRecordUrlUsing(): ?Closure
     {
@@ -51,51 +105,51 @@ class WacampaignsListComponent extends TableComponent
         return fn (Wa_campaigns $wacampaigns) => route('wacampaigns.settings', $wacampaigns);
     }
 
-    public function deleteWacampaings(Wa_campaigns $wacampaigns)
+    public function deleteWacampaigns(Wa_campaigns $wacampaigns)
     {
         $wacampaigns->delete();
         notify(__mc('Wa Campaigns has been deleted.'));
     }
 
+
     protected function getTableActions(): array
     {
         return [
-            // ActionGroup::make([
-            //     Action::make('Duplicate')
-            //         ->action(fn (Template $record) => $this->duplicateTemplate($record))
-            //         ->icon('heroicon-s-document-duplicate')
-            //         ->label(__mc('Duplicate')),
-            //     Action::make('Delete')
-            //         ->action(fn (Wa_campaigns $watemplates) => $this->deleteWatemplate($watemplates))
-            //         ->requiresConfirmation()
-            //         ->label(__mc('Delete'))
-            //         ->icon('heroicon-s-trash')
-            //         ->color('danger'),
-            // ]),
-            Action::make('Delete')
+            ActionGroup::make([
+                Action::make('Duplicate')
+                    ->action(fn (Wa_campaigns $wacampaigns) => $this->duplicateWacampaigns($wacampaigns))
+                    ->icon('heroicon-s-document-duplicate')
+                    ->label(__mc('Duplicate')),
+                Action::make('Delete')
                     ->action(fn (Wa_campaigns $wacampaigns) => $this->deleteWacampaigns($wacampaigns))
                     ->icon('heroicon-o-trash')
                     ->color('danger')
-                    ->label('')
+                    ->label('Delete')
                     ->tooltip(__mc('Delete'))
                     ->modalHeading(__mc('Delete'))
                     ->requiresConfirmation(),
+            ]),
+            
         ];
     }
 
-    public function duplicateTemplate(Template $template)
+    public function duplicateWacampaigns(Wa_campaigns $wacampaigns)
     {
-        $this->authorize('create', self::getTemplateClass());
+        $wanewcampaigns = Wa_campaigns::make();
+        $wanewcampaigns->name = 'Duplicate '.$wacampaigns->name;
+        $wanewcampaigns->uuid = Str::uuid()->toString();;
+        $wanewcampaigns->email_list_id = $wacampaigns->email_list_id;
+        $wanewcampaigns->wa_templates_id = $wacampaigns->wa_templates_id;
+        $wanewcampaigns->segment_class = $wacampaigns->segment_class;
+        $wanewcampaigns->segment_id = $wacampaigns->segment_id;
+        $wanewcampaigns->content = $wacampaigns->content;
+        $wanewcampaigns->file = $wacampaigns->file;
+        $wanewcampaigns->status = "draft";
+        $wanewcampaigns->save();
 
-        $duplicateTemplate = self::getTemplateClass()::create([
-            'name' => $template->name.' - '.__mc('copy'),
-            'html' => $template->html,
-            'structured_html' => $template->structured_html,
-        ]);
+        notify(__mc('Campaign :Wa campaign was created.', ['Wacampaings' => 'Duplicate '.$wacampaigns->name]));
 
-        notify(__mc('Template :template was created.', ['template' => $template->name]));
-
-        return redirect()->route('mailcoach.templates.edit', $duplicateTemplate);
+        return redirect()->route('wacampaigns.list');
     }
 
     public function getTitle(): string
@@ -128,7 +182,6 @@ class WacampaignsListComponent extends TableComponent
                 ->link(),
         ];
     }
-
 
     public function getLayoutData(): array
     {

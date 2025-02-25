@@ -7,6 +7,14 @@
 @endpush
 <div class="card-grid">
     <x-mailcoach::card>
+        <div class="ml-auto flex items-center gap-x-2 pointer-events-auto -mr-1.5">
+          <button class="bg-transparent hover:bg-sand-extra-light p-1.5 rounded-full transition-colors duration-300" type="button"
+              x-tooltip="'{{ __mc('Save & send test') }}'"
+              x-on:click="$wire.call('save'); $dispatch('open-modal', { id: 'send-watest-{{ $data->uuid }}' })"
+          >
+              <x-icon class="w-5 h-5" name="heroicon-o-paper-airplane" />
+          </button>
+        </div>
         <div class="flex gap-4">
             <div class="w-1/2">
               <form
@@ -43,26 +51,27 @@
                           </div>
 
                           <x-mailcoach::form-buttons>
-                              <x-mailcoach::button :label="__mc('Save Wa Templates')" />
+                              <x-mailcoach::button :label="__mc('Save Wa Content')" />
                           </x-mailcoach::form-buttons>
-      
-
-                      
               </form>
             </div>    
             <div class="w-1/2">
-            <h1 class="mt-6 mb-4 font-medium">Preview </h1>
-            @if ($data->file)
-              @if (strstr($data->type, "video/"))
-                <video class="w-1/2" src="{{ asset('storage/store/' . $data->file) }}" controls></video>
-              @else
-                <img class="w-1/2" src="{{ asset('storage/store/' . $data->file) }}" alt="Gambar">  
+              <h1 class="mt-6 mb-4 font-medium">Preview </h1>
+              @if ($data->file)
+                @if (strstr($data->type, "video/"))
+                  <video class="w-1/2" src="{{ asset('storage/store/' . $data->file) }}" controls></video>
+                @else
+                  <img class="w-1/2" src="{{ asset('storage/store/' . $data->file) }}" alt="Gambar">  
+                @endif
               @endif
-            @endif
-              <p class="w-1/2 mt-3 break-words whitespace-pre-wrap">{{ $data->content }}</p>
-            </div>    
+                <p class="w-1/2 mt-3 break-words whitespace-pre-wrap">{{ $data->content }}</p>
+            </div>
         </div>
         
+        <x-mailcoach::modal :title="__mc('Send Test')" name="send-watest-{{ $data->uuid }}" :dismissable="true">
+          {{-- @include('livewire.wacampaigns.partials.test') --}}
+          <livewire:Wacampaigns.WacampaignsSendtestComponent :model="$data"/>
+        </x-mailcoach::modal>
     
     </x-mailcoach::card>
 </div>
