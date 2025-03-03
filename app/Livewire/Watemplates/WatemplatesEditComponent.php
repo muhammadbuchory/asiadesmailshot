@@ -39,9 +39,7 @@ class WatemplatesEditComponent extends Component
 
     public function save(): void
     {
-
         $this->validate();
-
         if ($this->file) {
             if($this->file != $this->watemplates->file){
                 $this->file->storeAs('public/store', $this->file->hashName());
@@ -61,9 +59,24 @@ class WatemplatesEditComponent extends Component
             $this->watemplates->save();
         }
 
-        
-
         notify(__mc('The Wa template has been updated.'));
+    }
+
+    public function deleteWatemplates()
+    {
+        $this->watemplates->delete();
+        notify(__mc('Wa templates has been deleted.'));
+        return redirect()->route('watemplates.list');
+    }
+
+    public function deleteWatemplatesfiles()
+    {
+        $this->watemplates->name = $this->name;
+        $this->watemplates->content = $this->content;
+        $this->watemplates->file = NULL;
+        $this->watemplates->type = NULL;
+        $this->watemplates->save();
+        notify(__mc('Wa templates files has been deleted.'));
     }
 
     public function render()

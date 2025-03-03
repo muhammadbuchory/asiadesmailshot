@@ -14,11 +14,11 @@
                 </x-mailcoach::alert>
             @endif
 
-            {{-- @if($campaign->scheduled_at)
+            {{-- @if($campaign->schedule_at)
                 <x-mailcoach::alert type="success">
                 {!! __mc('Scheduled for delivery <span class="font-medium">:diff - :scheduledAt</span>.', [
-                    'diff' => $campaign->scheduled_at->diffForHumans(),
-                    'scheduledAt' => $campaign->scheduled_at->toMailcoachFormat(),
+                    'diff' => $campaign->schedule_at->diffForHumans(),
+                    'scheduledAt' => $campaign->schedule_at->toMailcoachFormat(),
                 ]) !!}
                 </x-mailcoach::alert>
             @endif --}}
@@ -60,12 +60,21 @@
                         />
                     @endif
 
-                    @if ($senders != "unknown")
-                        <x-mailcoach::checklist-item
+                    @if ($senders_class != "unknown")
+                        @if($senders_class == "selection")
+                            <x-mailcoach::checklist-item
                             warning
                             :label="__mc('Wa Senders')"
-                            :value="$senders"
+                            :value="'Selection ('.$senders.')'"
                         />
+                        @else
+                            <x-mailcoach::checklist-item
+                                warning
+                                :label="__mc('Wa Senders')"
+                                :value="__mc('All Sales')"
+                            />
+                        @endif
+                        
                     @else
                         <x-mailcoach::checklist-item
                         warning
@@ -92,14 +101,14 @@
         @endif --}}
         <div>
             @if ($isReady)
-                <div class="w-full flex flex-col" x-init="schedule = '{{ $campaign->scheduled_at || $errors->first('scheduled_at') ? 'future' : 'now' }}'"
+                <div class="w-full flex flex-col" x-init="schedule = '{{ $campaign->schedule_at || $errors->first('schedule_at') ? 'future' : 'now' }}'"
                      x-data="{ schedule: '' }" x-cloak>
-                    {{-- @if($campaign->scheduled_at)
+                    @if($campaign->schedule_at)
                         <x-mailcoach::alert type="success" class="w-full" full>
                             <p class="mb-3">
                                 {{ __mc('This campaign is scheduled to be sent at') }}
 
-                                <strong>{{ $campaign->scheduled_at->toMailcoachFormat() }}</strong>.
+                                <strong>{{ $campaign->schedule_at->toMailcoachFormat() }}</strong>.
                             </p>
                         </x-mailcoach::alert>
                         <x-mailcoach::button :label="__mc('Unschedule')" class="mt-4 mr-auto" type="submit" wire:click.prevent="unschedule">
@@ -131,8 +140,8 @@
                             @csrf
 
                             <x-mailcoach::date-time-field
-                                name="scheduled_at"
-                                :value="$scheduled_at_date"
+                                name="schedule_at"
+                                :value="$schedule_at_date"
                                 required
                             />
                             <p class="mt-2 text-xs text-gray-400">
@@ -146,7 +155,7 @@
                             </x-mailcoach::button>
 
                         </form>
-                    @endif --}}
+                    @endif
 
                     <div x-show="schedule === 'now'">
                         <x-mailcoach::button

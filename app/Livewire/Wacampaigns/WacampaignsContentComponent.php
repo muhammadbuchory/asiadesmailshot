@@ -18,8 +18,6 @@ class WacampaignsContentComponent extends Component
     public ?string $type;
     public $file;
 
-
-
     public function rules(): array
     {
         return [
@@ -72,6 +70,8 @@ class WacampaignsContentComponent extends Component
                 $this->wacampaigns->save();
             }else{
                 $this->wacampaigns->content = $this->content;
+                $this->wacampaigns->file = $this->watemplates->file;
+                $this->wacampaigns->type = $this->watemplates->type;
                 $this->wacampaigns->save();
             }
         }else{
@@ -81,14 +81,23 @@ class WacampaignsContentComponent extends Component
             $this->wacampaigns->save();
         }
 
-        notify(__mc('The Wa campaigns content has been updated.'));
+        notify(__mc('Wa campaigns content has been updated.'));
     }
+
+    // public function deleteWatemplatesfiles()
+    // {
+    //     $this->wacampaigns->content = $this->content;
+    //     $this->wacampaigns->file = NULL;
+    //     $this->wacampaigns->type = NULL;
+    //     $this->wacampaigns->save();
+    //     notify(__mc('Wa campaigns content has been updated.'));
+    // }
 
     public function sendTest(): void
     {
         dd("sendtest");
 
-        notify(__mc('The Wa campaigns content has been updated.'));
+        notify(__mc('Wa campaigns content has been updated.'));
     }
 
     public function render()

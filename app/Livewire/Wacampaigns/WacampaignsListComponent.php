@@ -30,7 +30,7 @@ class WacampaignsListComponent extends TableComponent
 
     protected function getDefaultTableSortDirection(): ?string
     {
-        return 'asc';
+        return 'desc';
     }
 
     public function getTableGroupingDirection(): ?string
@@ -53,10 +53,11 @@ class WacampaignsListComponent extends TableComponent
             ->label('');
     }
 
-    // protected function getDefaultTableSortColumn(): ?string
-    // {
-    //     return 'name';
-    // }
+    protected function getDefaultTableSortColumn(): ?string
+    {
+        return 'created_at';
+    }
+
 
     protected function getTableBulkActions(): array
     {
@@ -94,6 +95,11 @@ class WacampaignsListComponent extends TableComponent
                 ->sortable()
                 ->searchable()
                 ->size('base'),
+            TextColumn::make('created_at')
+                ->label(__mc('Created'))
+                ->date(config('mailcoach.date_format'), config('mailcoach.timezone'))
+                ->sortable()
+                ->alignRight(),
         ];
     }   
 

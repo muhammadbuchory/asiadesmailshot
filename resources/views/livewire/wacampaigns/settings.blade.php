@@ -13,7 +13,6 @@
 
     @if ($campaign->status->getLabel() == "" || $campaign->status->getLabel() == "Draft")
         @include('mailcoach::app.campaigns.partials.emailListFields', ['segmentable' => $campaign])
-    
     @else
         <x-mailcoach::fieldset card :legend="__mc('Audience')">
             <div>
@@ -31,17 +30,34 @@
     @endif
 
     <x-mailcoach::fieldset card :legend="__mc('Wa Sender')">
-            @if(count($sendersOptions) > 0)
-                <x-mailcoach::select-field
-                    :label="__mc('senders')"
-                    :options="$sendersOptions"
-                    wire:model.live="senders_id"
-                    position="bottom"
-                    name="senders_id"
-                    required
-                />
-            @endif
 
+    <div class="grid gap-3 items-start">
+      <x-mailcoach::radio-field
+        name="senders"
+        option-value="all"
+        wire:model.live="senders_class"
+        :label="__mc('All Sales')"
+      />
+      <x-mailcoach::radio-field
+        name="senders"
+        option-value="selection"
+        wire:model.live="senders_class"
+        :label="__mc('Selection')"
+      />
+
+      @if($senders_class == "selection" && count($sendersOptions) > 0)
+        <x-mailcoach::select-field
+            :label="__mc('senders')"
+            :options="$sendersOptions"
+            wire:model.live="senders_id"
+            position="bottom"
+            name="senders_id"
+            required
+        />
+      @endif
+
+
+    </div>
     </x-mailcoach::fieldset>
 
 

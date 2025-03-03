@@ -21,6 +21,7 @@ class WacampaignsSettingsComponent extends Component
     public Collection $segmentsData;
     public string $segment;
     
+    public string $senders_class;
     public int|string|null $senders_id = null;
     public int|string|null $email_list_id = null;
     public int|string|null $segment_id = null;
@@ -32,7 +33,7 @@ class WacampaignsSettingsComponent extends Component
     {
         return [
             'name' => ['required', 'string'],
-            'senders_id' => ['required','not_in:0'],
+            // 'senders_id' => ['required','not_in:0'],
         ];
     }
 
@@ -61,9 +62,10 @@ class WacampaignsSettingsComponent extends Component
 
         $this->segment = $this->wacampaigns->segment_id == "" ? 'entire_list' : 'segment';
 
+        $this->senders_class = $this->wacampaigns->senders_class;
+
         $this->sendersOptions = Wa_senders::orderBy('id')->get()
         ->mapWithKeys(fn (Wa_senders $wasenders) => [$wasenders->id => $wasenders->name])
-        ->prepend('-- None --', 0)
         ->toArray();
 
         $this->senders_id = ($this->wacampaigns->senders_id != 0 || $this->wacampaigns->senders_id != "" ? $this->wacampaigns->senders_id : array_key_first($this->sendersOptions));
@@ -76,8 +78,14 @@ class WacampaignsSettingsComponent extends Component
     public function save(): void
     {
         $this->validate();
-
-        $this->wacampaigns->senders_id = $this->senders_id;
+        
+        if($this->senders_class == "selection"){
+            $this->wacampaigns->senders_class = "selection";
+            $this->wacampaigns->senders_id = $this->senders_id;
+        }else{
+            $this->wacampaigns->senders_class = "all";
+            $this->wacampaigns->senders_id = NULL;
+        }
         $this->wacampaigns->email_list_id = $this->email_list_id;
         if($this->segment == "segment"){
             $this->wacampaigns->segment_id = $this->segment_id;

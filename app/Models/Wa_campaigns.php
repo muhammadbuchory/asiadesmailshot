@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Mailcoach\Domain\Shared\Traits\UsesMailcoachModels;
@@ -25,6 +26,7 @@ class Wa_campaigns extends Model
 
     public $casts = [
         'status' => CampaignStatus::class,
+        'schedule_at' => 'datetime',
     ];
 
 }

@@ -79,6 +79,10 @@
                 :href="route('wacampaigns.outbox', $campaign)"
                 :title="__mc('outbox')"
             />
+            <x-mailcoach::navigation-group
+                :href="route('wacampaigns.content', $campaign)"
+                :title="__mc('Content')"
+            />
             @else
 
             <x-mailcoach::navigation-group

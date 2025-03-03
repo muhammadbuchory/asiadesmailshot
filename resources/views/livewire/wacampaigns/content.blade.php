@@ -7,15 +7,18 @@
 @endpush
 <div class="card-grid">
     <x-mailcoach::card>
-        <div class="ml-auto flex items-center gap-x-2 pointer-events-auto -mr-1.5">
-          <button class="bg-transparent hover:bg-sand-extra-light p-1.5 rounded-full transition-colors duration-300" type="button"
-              x-tooltip="'{{ __mc('Save & send test') }}'"
-              x-on:click="$wire.call('save'); $dispatch('open-modal', { id: 'send-watest-{{ $data->uuid }}' })"
-          >
-              <x-icon class="w-5 h-5" name="heroicon-o-paper-airplane" />
-          </button>
-        </div>
+        @if($data->status->getLabel() != 'Sending' && $data->status->getLabel() != 'Sent')
+          <div class="ml-auto flex items-center gap-x-2 pointer-events-auto -mr-1.5">
+            <button class="bg-transparent hover:bg-sand-extra-light p-1.5 rounded-full transition-colors duration-300" type="button"
+                x-tooltip="'{{ __mc('Save & send test') }}'"
+                x-on:click="$wire.call('save'); $dispatch('open-modal', { id: 'send-watest-{{ $data->uuid }}' })"
+            >
+                <x-icon class="w-5 h-5" name="heroicon-o-paper-airplane" />
+            </button>
+          </div>
+        @endif
         <div class="flex gap-4">
+          @if($data->status->getLabel() != 'Sending' && $data->status->getLabel() != 'Sent')
             <div class="w-1/2">
               <form
                       class="form-grid mt-6"
@@ -55,8 +58,9 @@
                           </x-mailcoach::form-buttons>
               </form>
             </div>    
+          @endif
             <div class="w-1/2">
-              <h1 class="mt-6 mb-4 font-medium">Preview </h1>
+              <h1 class="mt-6 mb-4 font-medium">{{($data->status->getLabel() != 'Sending' && $data->status->getLabel() != 'Sent' ? "Preview" : "Content Sending :")}}</h1>
               @if ($data->file)
                 @if (strstr($data->type, "video/"))
                   <video class="w-1/2" src="{{ asset('storage/store/' . $data->file) }}" controls></video>
@@ -72,7 +76,7 @@
           {{-- @include('livewire.wacampaigns.partials.test') --}}
           <livewire:Wacampaigns.WacampaignsSendtestComponent :model="$data"/>
         </x-mailcoach::modal>
-    
+        
     </x-mailcoach::card>
 </div>
 

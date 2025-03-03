@@ -33,7 +33,7 @@ class WacampaignsCreateComponent extends Component implements HasActions, HasFor
             ->mapWithKeys(fn (EmailList $list) => [$list->id => $list->name])
             ->toArray();
 
-        $this->templateOptions = Wa_templates::orderBy('name')->get()
+        $this->templateOptions = Wa_templates::orderBy('created_at','desc')->get()
         ->mapWithKeys(fn (Wa_templates $watemplates) => [$watemplates->id => $watemplates->name])
         ->prepend('-- None --', 0)
         ->toArray();
@@ -47,7 +47,7 @@ class WacampaignsCreateComponent extends Component implements HasActions, HasFor
         $validated = $this->validate([
             'name' => 'required|string',
             'email_list_id' => 'required',
-            'template_id' => 'required',
+            'template_id' => 'required|numeric|min:0|not_in:0',
 
         ]);
 
@@ -56,6 +56,7 @@ class WacampaignsCreateComponent extends Component implements HasActions, HasFor
         $wacampaigns->uuid = Str::uuid()->toString();;
         $wacampaigns->email_list_id = $validated['email_list_id'];
         $wacampaigns->wa_templates_id = $validated['template_id'];
+        $wacampaigns->senders_class = "all";
         $wacampaigns->segment_class = 'Spatie\Mailcoach\Domain\Audience\Support\Segments\EverySubscriberSegment';
         $wacampaigns->status = "draft";
         $wacampaigns->save();

@@ -6,6 +6,7 @@ namespace App\Livewire\Watemplates;
 // use Illuminate\Http\Request;
 use App\Models\Wa_templates;
 use Closure;
+use Illuminate\Support\Str;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Columns\TextColumn;
@@ -22,8 +23,14 @@ class WatemplatesListComponent extends TableComponent
 
     protected function getDefaultTableSortColumn(): ?string
     {
-        return 'name';
+        return 'created_at';
     }
+    
+    protected function getDefaultTableSortDirection(): ?string
+    {
+        return 'desc';
+    }
+
 
     protected function getTableColumns(): array
     {
@@ -33,6 +40,21 @@ class WatemplatesListComponent extends TableComponent
                 ->searchable()
                 ->size('base')
                 ->extraAttributes(['class' => 'link']),
+            TextColumn::make('file')
+                ->sortable()
+                ->size('base')
+                ->formatStateUsing(function ($record) {
+                  return view('livewire.watemplates.partials.files', ["templates"=>$record]);
+                })
+                ->html(),
+            TextColumn::make('type')
+                ->sortable()
+                ->size('base'),
+            TextColumn::make('created_at')
+                ->label(__mc('Created'))
+                ->date(config('mailcoach.date_format'), config('mailcoach.timezone'))
+                ->sortable()
+                ->alignRight(),
         ];
     }
 
@@ -44,7 +66,7 @@ class WatemplatesListComponent extends TableComponent
         return fn (Wa_templates $watemplates) => route('watemplates.edit', $watemplates);
     }
 
-    public function deleteWatemplate(Wa_templates $watemplates)
+    public function deleteWatemplates(Wa_templates $watemplates)
     {
         $watemplates->delete();
         notify(__mc('Wa templates has been deleted.'));
@@ -53,42 +75,35 @@ class WatemplatesListComponent extends TableComponent
     protected function getTableActions(): array
     {
         return [
-            // ActionGroup::make([
-            //     Action::make('Duplicate')
-            //         ->action(fn (Template $record) => $this->duplicateTemplate($record))
-            //         ->icon('heroicon-s-document-duplicate')
-            //         ->label(__mc('Duplicate')),
-            //     Action::make('Delete')
-            //         ->action(fn (Wa_templates $watemplates) => $this->deleteWatemplate($watemplates))
-            //         ->requiresConfirmation()
-            //         ->label(__mc('Delete'))
-            //         ->icon('heroicon-s-trash')
-            //         ->color('danger'),
-            // ]),
-            Action::make('Delete')
-                    ->action(fn (Wa_templates $watemplates) => $this->deleteWatemplate($watemplates))
+            ActionGroup::make([
+                Action::make('Duplicate')
+                    ->action(fn (Wa_templates $watemplates) => $this->duplicateWatemplates($watemplates))
+                    ->icon('heroicon-s-document-duplicate')
+                    ->label(__mc('Duplicate')),
+                Action::make('Delete')
+                    ->action(fn (Wa_templates $watemplates) => $this->deleteWatemplates($watemplates))
                     ->icon('heroicon-o-trash')
                     ->color('danger')
-                    ->label('')
-                    ->tooltip(__mc('Delete'))
+                    ->label('Delete')
                     ->modalHeading(__mc('Delete'))
                     ->requiresConfirmation(),
+            ]),
         ];
     }
 
-    public function duplicateTemplate(Template $template)
+    public function duplicateWatemplates(Wa_templates $watemplates)
     {
-        $this->authorize('create', self::getTemplateClass());
+        $wanewtemplates = Wa_templates::make();
+        $wanewtemplates->name = 'Duplicate '.$watemplates->name;
+        $wanewtemplates->uuid = Str::uuid()->toString();
+        $wanewtemplates->content = $watemplates->content;
+        $wanewtemplates->file = $watemplates->wa_templates_id;
+        $wanewtemplates->type = $watemplates->type;
+        $wanewtemplates->save();
 
-        $duplicateTemplate = self::getTemplateClass()::create([
-            'name' => $template->name.' - '.__mc('copy'),
-            'html' => $template->html,
-            'structured_html' => $template->structured_html,
-        ]);
+        notify(__mc('Template :Wa template was created.', ['Watemplates' => 'Duplicate '.$watemplates->name]));
 
-        notify(__mc('Template :template was created.', ['template' => $template->name]));
-
-        return redirect()->route('mailcoach.templates.edit', $duplicateTemplate);
+        return redirect()->route('watemplates.list');
     }
 
     public function getTitle(): string

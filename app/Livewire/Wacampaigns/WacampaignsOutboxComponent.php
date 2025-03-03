@@ -61,7 +61,12 @@ class WacampaignsOutboxComponent extends TableComponent
                 ->size('base')
                 ->getStateUsing(function ($record) {
                     if($record->status == "failed"){
-                        $reason = $record->response;
+                        $res = json_decode($record->response);
+                        if(isset($res->results)){
+                            $reason = $res->results->message;
+                        }else{
+                            $reason = $record->response;
+                        }
                     }else{
                         $reason = "";
                     }

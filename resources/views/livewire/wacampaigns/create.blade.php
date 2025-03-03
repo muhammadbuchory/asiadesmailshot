@@ -9,7 +9,7 @@
         required />
 
         <x-mailcoach::select-field
-            :label="__mc('Email list')"
+            :label="__mc('Audience list')"
             :options="$emailListOptions"
             wire:model.lazy="email_list_id"
             name="email_list_id"
@@ -19,6 +19,7 @@
         @if(count($templateOptions) > 1)
             <x-mailcoach::select-field
                 :label="__mc('Template')"
+                :sort=false
                 :options="$templateOptions"
                 wire:model.lazy="template_id"
                 position="top"

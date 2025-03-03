@@ -1,12 +1,12 @@
 
 <div class="card-grid" id="wacampaign-summary" wire:poll.5s.keep-alive>
-    @if (!is_null($progress))
+    @if (!is_null($load->progress))
         @include('livewire.wacampaigns.partials.campaignStatus', [
             'type' => 'help',
             'status' => __mc('is preparing to send to'),
             'sync' => true,
             'cancelable' => false,
-            'progress' => $progress,
+            'progress' => $load->progress,
         ])
     @endif
 
@@ -48,7 +48,6 @@
                 : null,
         ])
     @endif --}}
-
     @if($campaign->status->getLabel() == "Sent")
         
             {{-- @include('mailcoach::app.campaigns.partials.campaignStatus', [
@@ -66,7 +65,7 @@
      
         @include('livewire.wacampaigns.partials.campaignStatus', [
             'type' => 'success',
-            'status' => __mc_choice('was delivered successfully to :count subscriber of|was delivered successfully to :count subscribers of', $recipient),
+            'status' => __mc_choice('was delivered successfully to :count subscriber of|was delivered successfully to :count subscribers of', $load->recipient),
         ])
 
         {{-- @if($failedSendsCount)

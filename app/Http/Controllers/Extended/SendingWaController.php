@@ -23,11 +23,10 @@ class SendingWaController
         )
         ->leftjoin('wa_campaigns as campaigns', 'campaigns.id','=', 'outbox.wa_campaigns_id')
         ->leftjoin('wa_templates as templates', 'templates.id','=', 'campaigns.wa_templates_id')
-        ->leftjoin('wa_senders as senders', 'senders.id','=', 'campaigns.senders_id')
+        ->leftjoin('wa_senders as senders', 'senders.id','=', 'outbox.senders_id')
         ->where('outbox.status', 'waiting')
         ->limit(50)
         ->get();
-  
     foreach ($list as $list) {
       if($list->new_file != "" || $list->old_file != ""){
         $url = "https://notifapi.com/send_image_url";
@@ -68,12 +67,11 @@ class SendingWaController
       $res = curl_exec($ch);
       $waoutbox = Wa_outbox::find($list->outbox_id);
       $waoutbox->response = $res;
-      if($res == "phone_no empty"){
-        continue;
-      }
-      if(json_decode($res)->code == "200"){
+      
+      if(isset(json_decode($res)->code) &&  json_decode($res)->code == "200"){
         $waoutbox->status = "sent";
       }else{
+        $waoutbox->response = $res;
         $waoutbox->status = "failed";
       }
       $waoutbox->send_at = now();

@@ -3,19 +3,19 @@
     <div class="grid grid-cols-3 divide-x divide-snow">
         <x-mailcoach::statistic
             :href="route('mailcoach.campaigns.outbox', $campaign)"
-            :stat="$recipient"
+            :stat="$load->recipient"
             :label="__mc('Recipients')"
         />
 
         <x-mailcoach::statistic
-            :href="route('mailcoach.campaigns.unsubscribes', $campaign)"
-            :stat="$sent"
+            :href="route('mailcoach.campaigns.outbox', $campaign)"
+            :stat="$load->sent"
             :label="__mc('Sent')"
         />
 
         <x-mailcoach::statistic
-            :href="route('mailcoach.campaigns.unsubscribes', $campaign)"
-            :stat="$failed"
+            :href="route('mailcoach.campaigns.outbox', $campaign)"
+            :stat="$load->failed"
             :label="__mc('Failed')"
         />
 
