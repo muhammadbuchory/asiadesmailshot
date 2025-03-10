@@ -25,6 +25,7 @@ class ReportController
         'msubscriber.email', 
         'msubscriber.first_name', 
         'msubscriber.last_name', 
+        'msubscriber.extra_attributes', 
          DB::raw('COUNT(mclicks.send_id) AS clicks'),
          DB::raw('COUNT(mopens.send_id) AS opens')
          )
@@ -53,13 +54,23 @@ class ReportController
 
           $no = 1;
           foreach ($list as $list) {
+              if($list->extra_attributes){
+                $listdetail = json_decode($list->extra_attributes);
+                $person = ($listdetail->person ? $listdetail->person : "-");
+                $country = ($listdetail->country ? $listdetail->country : "-");
+                $sales = ($listdetail->sales ? $listdetail->sales : "-");
+              }else{
+                $person = "-";
+                $country = "-";
+                $sales = "-";
+              }
               $data[] = [
                   $no,
                   $list->first_name .' '.$list->last_name,
-                  '',
+                  $person,
                   $list->email,
-                  '',
-                  '',
+                  $country,
+                  $sales,
                   ($list->opens > 0 ? $list->opens : "0"),
                   ($list->clicks > 0 ? $list->clicks : "0"),
               ];
