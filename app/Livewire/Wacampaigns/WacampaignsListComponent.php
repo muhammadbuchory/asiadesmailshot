@@ -17,15 +17,42 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Grouping\Group;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Spatie\Mailcoach\Domain\Template\Models\Template;
 use Spatie\Mailcoach\Livewire\TableComponent;
+use Spatie\Mailcoach\Mailcoach;
 
 class WacampaignsListComponent extends TableComponent
 {
     protected function getTableQuery(): Builder
     {
-        return Wa_campaigns::query();
+        DB::enableQueryLog();
+        $query = Wa_campaigns::query()
+        ->select('*')
+        ->addSelect(
+            DB::raw(Mailcoach::isPostgresqlDatabase()
+            ? <<<"SQL"
+                CASE
+                    WHEN status = 'draft' AND schedule_at IS NULL THEN '2999-01-01'::timestamp + INTERVAL '1 day' * id
+                    WHEN schedule_at IS NOT NULL THEN schedule_at
+                    WHEN sent_at IS NOT NULL THEN sent_at
+                    ELSE updated_at
+                END as sent_sort
+            SQL
+            : <<<"SQL"
+                CASE
+                    WHEN status = 'draft' AND schedule_at IS NULL THEN CONCAT(999999999, id)
+                    WHEN schedule_at IS NOT NULL THEN schedule_at
+                    WHEN sent_at IS NOT NULL THEN sent_at
+                    ELSE updated_at
+                END as 'sent_sort'
+            SQL
+            )
+        );
+        // dd($query);
+
+        return $query;
     }
 
     protected function getDefaultTableSortDirection(): ?string
@@ -35,17 +62,17 @@ class WacampaignsListComponent extends TableComponent
 
     public function getTableGroupingDirection(): ?string
     {
-        return $this->getTableSortDirection() ?? 'asc';
+        return $this->getTableSortDirection() ?? 'desc';
     }
 
     public function getTableGrouping(): ?Group
     {
-        return Group::make('status')
+        return Group::make('sent_sort')
             ->getTitleFromRecordUsing(function ($record) {
                 return match (true) {
                     $record->status->getLabel() === 'Sending' => __mc('Sending'),
-                    // $record->status === CampaignStatus::Draft && $record->scheduled_at => __mc('Scheduled'),
-                    $record->status->getLabel() === 'Draft' => __mc('Draft'),
+                    $record->status->getLabel() === 'Draft' && ! $record->schedule_at => __mc('Draft'),
+                    $record->status->getLabel() === 'Draft' && $record->schedule_at => __mc('Scheduled'),
                     $record->status->getLabel() === 'Sent' => __mc('Sent Wa Campaigns'),
                     default => '',
                 };
@@ -55,7 +82,7 @@ class WacampaignsListComponent extends TableComponent
 
     protected function getDefaultTableSortColumn(): ?string
     {
-        return 'created_at';
+        return 'id';
     }
 
 
@@ -95,6 +122,11 @@ class WacampaignsListComponent extends TableComponent
                 ->sortable()
                 ->searchable()
                 ->size('base'),
+            TextColumn::make('schedule_at')
+                ->label(__mc('Scheduled'))
+                ->date(config('mailcoach.date_format'), config('mailcoach.timezone'))
+                ->sortable()
+                ->alignRight(),
             TextColumn::make('created_at')
                 ->label(__mc('Created'))
                 ->date(config('mailcoach.date_format'), config('mailcoach.timezone'))
@@ -141,6 +173,7 @@ class WacampaignsListComponent extends TableComponent
 
     public function duplicateWacampaigns(Wa_campaigns $wacampaigns)
     {
+        
         $wanewcampaigns = Wa_campaigns::make();
         $wanewcampaigns->name = 'Duplicate '.$wacampaigns->name;
         $wanewcampaigns->uuid = Str::uuid()->toString();;
@@ -148,6 +181,9 @@ class WacampaignsListComponent extends TableComponent
         $wanewcampaigns->wa_templates_id = $wacampaigns->wa_templates_id;
         $wanewcampaigns->segment_class = $wacampaigns->segment_class;
         $wanewcampaigns->segment_id = $wacampaigns->segment_id;
+        $wanewcampaigns->senders_class = $wacampaigns->senders_class;
+        $wanewcampaigns->senders_id = $wacampaigns->senders_id;
+        $wanewcampaigns->schedule_at = $wacampaigns->schedule_at;
         $wanewcampaigns->content = $wacampaigns->content;
         $wanewcampaigns->file = $wacampaigns->file;
         $wanewcampaigns->status = "draft";

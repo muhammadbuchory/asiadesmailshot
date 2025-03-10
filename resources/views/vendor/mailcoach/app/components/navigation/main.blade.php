@@ -55,11 +55,28 @@
                         @include('mailcoach::app.layouts.partials.beforeFirstMenuItem')
 
                         @foreach (app(MainNavigation::class)->tree() as $index => $item)
+
+                            @if($index == 2)
+                            <div class="navigation-dropdown-trigger group">
+                                <a wire:navigate class="font-medium hover:text-blue-dark {{ request()->routeIs('wacampaigns.*') ? 'text-blue-dark' : '' }}" href="{{ url('/wacampaigns') }}">
+                                    WA Campaigns
+                                </a>
+                            </div>
+                            @endif
+
                             <div class="navigation-dropdown-trigger group">
                                 <a wire:navigate class="font-medium hover:text-blue-dark {{ $item['active'] ? 'text-blue-dark' : '' }}" href="{{ $item['url'] }}">
                                     {{ $item['title'] }}
                                 </a>
                             </div>
+
+                            @if($index == 5)
+                            <div class="navigation-dropdown-trigger group">
+                                <a wire:navigate class="font-medium hover:text-blue-dark {{ request()->routeIs('watemplates.*') ? 'text-blue-dark' : '' }}" href="{{ url('/watemplates') }}">
+                                    WA Templates
+                                </a>
+                            </div>
+                            @endif
                         @endforeach
 
                         @include('mailcoach::app.layouts.partials.afterLastMenuItem')

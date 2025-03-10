@@ -51,6 +51,11 @@
                               <div wire:loading wire:target="file">
                                 <span class="ml-1 text-gray-700">Uploading...</span>
                               </div>
+                              <span class="ml-1 text-xs text-gray-700">
+                                File Support<br>
+                                Max Size : 15mb<br>
+                                Type file : JPG,JPEG,WEBP,GIF,MP4,WEBM
+                              </span>
                           </div>
 
                           <x-mailcoach::form-buttons>

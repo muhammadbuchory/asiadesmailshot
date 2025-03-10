@@ -82,7 +82,7 @@ Route::middleware('auth')->group(function () {
     });
     
     
-    Route::get('/reportsent', [ReportController::class, 'Exportsent']);
+    Route::get('/reportsent', [ReportController::class, 'ExportCampaignssent']);
 
 });
 

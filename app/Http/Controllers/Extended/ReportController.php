@@ -10,7 +10,7 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class ReportController
 {
-    public function Exportsent(Request $request)
+    public function ExportCampaignssent(Request $request)
     {
       if($request->has('id')){
         $uuid = $request->query('id');
@@ -42,8 +42,11 @@ class ReportController
         if($list){
           $data = [[
             'No',
+            'Company',
             'Name',
             'Email',
+            'Country',
+            'Sales',
             'Opens',
             'Click',
           ]];
@@ -53,9 +56,12 @@ class ReportController
               $data[] = [
                   $no,
                   $list->first_name .' '.$list->last_name,
+                  '',
                   $list->email,
-                  $list->opens,
-                  $list->clicks,
+                  '',
+                  '',
+                  ($list->opens > 0 ? $list->opens : "0"),
+                  ($list->clicks > 0 ? $list->clicks : "0"),
               ];
           $no++;
           }
@@ -89,4 +95,75 @@ class ReportController
       }
     }
 
+    public function ExportWaCampaignssent(Request $request)
+    {
+      if($request->has('id')){
+        $uuid = $request->query('id');
+        // DB::enableQueryLog();
+        $list = DB::table('wa_campaigns as wacampaign')
+        ->select('wacampaign.id', 
+        'wacampaign.name', 
+        'wacampaign.status',  
+        'waoutbox.phone', 
+        'subscriber.first_name', 
+        'subscriber.last_name'
+         )
+        ->leftjoin('wa_outbox as waoutbox', 'waoutbox.wa_campaigns_id','=', 'wacampaign.id')
+        ->leftjoin('mailcoach_subscribers as subscriber', 'subscriber.id','=', 'waoutbox.subscriber_id')
+        ->where('wacampaign.uuid', $uuid)
+        ->orderBy('msubscriber.first_name', 'ASC')
+        ->get();
+        // dd($list);
+        // dd(DB::getQueryLog());
+        if($list){
+          $data = [[
+            'No',
+            'Company',
+            'Name',
+            'Email',
+            'Country',
+            'Sales',
+          ]];
+
+          $no = 1;
+          foreach ($list as $list) {
+              $data[] = [
+                  $no,
+                  $list->first_name .' '.$list->last_name,
+                  '',
+                  $list->email,
+                  '',
+                  '',
+              ];
+          $no++;
+          }
+
+          $filename = $list->name."-Report (".date('d-m-Y').").xlsx";
+
+          return Excel::download(new class($data) implements FromArray, WithStyles {
+            protected $data;
+
+            public function __construct(array $data)
+            {
+                $this->data = $data;
+            }
+
+            public function array(): array
+            {
+                return $this->data;
+            }
+
+            public function styles(Worksheet $sheet)
+              {
+                  foreach (range('A', 'E') as $columnID) {
+                      $sheet->getColumnDimension($columnID)->setAutoSize(true);
+                  }
+              }
+
+          }, $filename);
+        }else{
+          exit;
+        }
+      }
+    }
 }
