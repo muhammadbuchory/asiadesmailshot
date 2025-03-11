@@ -56,9 +56,9 @@ class ReportController
           foreach ($list as $list) {
               if($list->extra_attributes){
                 $listdetail = json_decode($list->extra_attributes);
-                $person = ($listdetail->person ? $listdetail->person : "-");
-                $country = ($listdetail->country ? $listdetail->country : "-");
-                $sales = ($listdetail->sales ? $listdetail->sales : "-");
+                $person = (isset($listdetail->person) ? $listdetail->person : "-");
+                $country = (isset($listdetail->country) ? $listdetail->country : "-");
+                $sales = (isset($listdetail->sales) ? $listdetail->sales : "-");
               }else{
                 $person = "-";
                 $country = "-";
