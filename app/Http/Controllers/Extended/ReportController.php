@@ -77,7 +77,7 @@ class ReportController
           $no++;
           }
 
-          $filename = $list->name."-Report (".date('d-m-Y').").xlsx";
+          $filename = $list->name." - Mailshot Report (".date('d-m-Y').").xlsx";
 
           return Excel::download(new class($data) implements FromArray, WithStyles {
             protected $data;
@@ -94,7 +94,7 @@ class ReportController
 
             public function styles(Worksheet $sheet)
               {
-                  foreach (range('A', 'E') as $columnID) {
+                  foreach (range('A', 'H') as $columnID) {
                       $sheet->getColumnDimension($columnID)->setAutoSize(true);
                   }
               }
@@ -116,13 +116,15 @@ class ReportController
         'wacampaign.name', 
         'wacampaign.status',  
         'waoutbox.phone', 
+        'waoutbox.status', 
         'subscriber.first_name', 
-        'subscriber.last_name'
+        'subscriber.last_name',
+        'subscriber.extra_attributes'
          )
         ->leftjoin('wa_outbox as waoutbox', 'waoutbox.wa_campaigns_id','=', 'wacampaign.id')
         ->leftjoin('mailcoach_subscribers as subscriber', 'subscriber.id','=', 'waoutbox.subscriber_id')
         ->where('wacampaign.uuid', $uuid)
-        ->orderBy('msubscriber.first_name', 'ASC')
+        ->orderBy('waoutbox.updated_at', 'ASC')
         ->get();
         // dd($list);
         // dd(DB::getQueryLog());
@@ -131,25 +133,37 @@ class ReportController
             'No',
             'Company',
             'Name',
-            'Email',
+            'phone',
             'Country',
             'Sales',
+            'Status'
           ]];
 
           $no = 1;
           foreach ($list as $list) {
+              if($list->extra_attributes){
+                $listdetail = json_decode($list->extra_attributes);
+                $person = (isset($listdetail->person) ? $listdetail->person : "-");
+                $country = (isset($listdetail->country) ? $listdetail->country : "-");
+                $sales = (isset($listdetail->sales) ? $listdetail->sales : "-");
+              }else{
+                $person = "-";
+                $country = "-";
+                $sales = "-";
+              }
               $data[] = [
                   $no,
                   $list->first_name .' '.$list->last_name,
-                  '',
-                  $list->email,
-                  '',
-                  '',
+                  $person,
+                  $list->phone.' ',
+                  $country,
+                  $sales,
+                  $list->status,
               ];
           $no++;
           }
 
-          $filename = $list->name."-Report (".date('d-m-Y').").xlsx";
+          $filename = $list->name." - WA shot Report (".date('d-m-Y').").xlsx";
 
           return Excel::download(new class($data) implements FromArray, WithStyles {
             protected $data;
@@ -166,7 +180,7 @@ class ReportController
 
             public function styles(Worksheet $sheet)
               {
-                  foreach (range('A', 'E') as $columnID) {
+                  foreach (range('A', 'F') as $columnID) {
                       $sheet->getColumnDimension($columnID)->setAutoSize(true);
                   }
               }

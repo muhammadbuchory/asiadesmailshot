@@ -30,6 +30,8 @@ class WacampaignsOutboxComponent extends TableComponent
     protected function getTableQuery(): Builder
     {
         return Wa_outbox::query()
+                ->select('wa_outbox.*', 'subscribers.first_name', 'subscribers.last_name', 'subscribers.extra_attributes')
+                ->leftJoin('mailcoach_subscribers as subscribers', 'subscribers.id', '=', 'wa_outbox.subscriber_id')
                 ->where('wa_campaigns_id','=',$this->wacampaigns->id);
     }
 
@@ -41,6 +43,26 @@ class WacampaignsOutboxComponent extends TableComponent
     protected function getTableColumns(): array
     {
         return [
+            TextColumn::make('company')
+                ->label(__mc('Company'))
+                ->getStateUsing(function ($record) {
+                    $company = $record->first_name." ".$record->last_name;
+                    return $company;
+                })
+                ->size('base'),
+            TextColumn::make('Person')
+                ->label(__mc('Name'))
+                ->getStateUsing(function ($record) {
+                    if($record->extra_attributes){
+                        $listdetail = json_decode($record->extra_attributes);
+                        $name = (isset($listdetail->person) ? $listdetail->person : "-");
+                    }else{
+                        $name = "-";
+                    }
+                    $company = $record->first_name." ".$record->last_name;
+                    return $name;
+                })
+                ->size('base'),
             TextColumn::make('phone')
                 ->sortable()
                 ->searchable()

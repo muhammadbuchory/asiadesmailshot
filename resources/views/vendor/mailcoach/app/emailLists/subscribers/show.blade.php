@@ -81,7 +81,7 @@
                     <template x-for="(attribute, index) in attributes" x-bind:key="index">
                         <div class="my-4 flex items-center w-full gap-x-2">
                             <div class="relative w-full flex items-center">
-                                <x-mailcoach::text-field wrapper-class="w-full" x-model="attribute.key" name="key"
+                                <x-mailcoach::text-field autocomplete="on" wrapper-class="w-full" x-model="attribute.key" name="key"
                                                          :label="__mc('Key')">
                                 </x-mailcoach::text-field>
                                 <button

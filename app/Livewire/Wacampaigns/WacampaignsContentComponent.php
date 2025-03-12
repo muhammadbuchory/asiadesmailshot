@@ -84,21 +84,21 @@ class WacampaignsContentComponent extends Component
         notify(__mc('Wa campaigns content has been updated.'));
     }
 
-    // public function deleteWatemplatesfiles()
-    // {
-    //     $this->wacampaigns->content = $this->content;
-    //     $this->wacampaigns->file = NULL;
-    //     $this->wacampaigns->type = NULL;
-    //     $this->wacampaigns->save();
-    //     notify(__mc('Wa campaigns content has been updated.'));
-    // }
-
-    public function sendTest(): void
+    public function deleteWatemplatesfiles()
     {
-        dd("sendtest");
-
+        $this->wacampaigns->content = $this->content;
+        $this->wacampaigns->file = NULL;
+        $this->wacampaigns->type = NULL;
+        $this->wacampaigns->save();
         notify(__mc('Wa campaigns content has been updated.'));
     }
+
+    // public function sendTest(): void
+    // {
+    //     dd("sendtest");
+
+    //     notify(__mc('Wa campaigns content has been updated.'));
+    // }
 
     public function render()
     {

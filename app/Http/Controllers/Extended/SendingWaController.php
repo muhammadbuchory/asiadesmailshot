@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Extended;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Wa_campaigns;
+use App\Models\Wa_senders;
 use App\Models\Wa_outbox;
 
 class SendingWaController
@@ -97,10 +98,88 @@ class SendingWaController
       }
       echo "finish wa campaigns \n";
     }
+  }
 
-    
-    
+  public function WaSchecuduleJobs(){
+    $campaigns = Wa_campaigns::where('status','=','draft')
+                ->where('schedule_at','!=', NULL) 
+                ->get();
+    foreach ($campaigns as $campaigns) {
+      if(now() > $campaigns->schedule_at){
+        $campaigns->status = "sending";
+        $campaigns->save();
+        echo "update wa campaings". $campaigns->name." ".now()."\n";
 
+        $subscribersQuery = $campaigns->baseSubscribersQuery();
+        $segment = $campaigns->getSegment();
+        $segment->subscribersQuery($subscribersQuery);
+        $list = $subscribersQuery->orderBy('id')->get();
+
+        foreach ($list as $list) {
+          if($campaigns->senders_class == 'all'){
+              if(isset($list->extra_attributes['sales'])){
+                  $wasenders = $wasenders = Wa_senders::where('name','=',$list->extra_attributes['sales'])->first();
+                  if($wasenders){
+                      $waoutbox = Wa_outbox::make();
+                      $waoutbox->wa_campaigns_id = $campaigns->id;
+                      $waoutbox->subscriber_id = $list->id;
+                      $waoutbox->senders_id = $wasenders->id;
+                      if($list->extra_attributes['phone']){
+                          $waoutbox->phone = $list->extra_attributes['phone'];
+                          $waoutbox->status = "waiting";
+                      }else{
+                          $waoutbox->response = "Not a valid phone number";
+                          $waoutbox->status = "failed";
+                      }
+                      $waoutbox->save();
+                  }else{
+                      $waoutbox = Wa_outbox::make();
+                      $waoutbox->wa_campaigns_id = $campaigns->id;
+                      $waoutbox->subscriber_id = $list->id;
+                      $waoutbox->senders_id = NULL;
+                      if($list->extra_attributes['phone']){
+                          $waoutbox->phone = $list->extra_attributes['phone'];
+                          $waoutbox->response = "Not a valid sales sanders";
+                          $waoutbox->status = "failed";
+                      }else{
+                          $waoutbox->response = "Not a valid phone number";
+                          $waoutbox->status = "failed";
+                      }
+                      $waoutbox->save();
+                  }
+              }else{
+                  $waoutbox = Wa_outbox::make();
+                  $waoutbox->wa_campaigns_id = $campaigns->id;
+                  $waoutbox->subscriber_id = $list->id;
+                  $waoutbox->senders_id = NULL;
+                  if($list->extra_attributes['phone']){
+                      $waoutbox->phone = $list->extra_attributes['phone'];
+                      $waoutbox->response = "Not a valid sales sanders";
+                      $waoutbox->status = "failed";
+                  }else{
+                      $waoutbox->response = "Not a valid phone number";
+                      $waoutbox->status = "failed";
+                  }
+                  $waoutbox->save();
+              }
+          }else{
+              $waoutbox = Wa_outbox::make();
+              $waoutbox->wa_campaigns_id = $campaigns->id;
+              $waoutbox->subscriber_id = $list->id;
+              $waoutbox->senders_id = $campaigns->senders_id;
+              if($list->extra_attributes['phone']){
+                  $waoutbox->phone = $list->extra_attributes['phone'];
+                  $waoutbox->status = "waiting";
+              }else{
+                  $waoutbox->response = "Not a valid phone number";
+                  $waoutbox->status = "failed";
+              }
+              $waoutbox->save();
+          } 
+      }
+
+      }
+    }
   }
 
 }

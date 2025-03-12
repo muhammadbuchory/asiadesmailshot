@@ -81,8 +81,8 @@ Route::middleware('auth')->group(function () {
        
     });
     
-    
     Route::get('/reportsent', [ReportController::class, 'ExportCampaignssent']);
+    Route::get('/reportwasent', [ReportController::class, 'ExportWaCampaignssent']);
 
 });
 

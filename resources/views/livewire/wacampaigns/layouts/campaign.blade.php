@@ -33,8 +33,8 @@
                     @endif
                 </div>
             </div>
-            @if(Str::endsWith(url()->current(), 'summary') && $campaign->status->value != "draft" && $campaign->status->value != "sending")
-            <a href="{{ url('/reportsent?id=').$campaign->uuid }}" class="hidden sm:flex ml-auto button" target="_blank">
+            @if(Str::contains(url()->current(), 'summary') && $campaign->status->getLabel() != "draft" && $campaign->status->getLabel() != "sending")
+            <a href="{{ url('/reportwasent?id=').$campaign->uuid }}" class="hidden sm:flex ml-auto button" target="_blank">
                 <svg class="w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 12"><path fill="#fff" d="M.007 12 14 6 .007 0 0 4.667 10 6 0 7.333.007 12Z"/></svg>
                 <span>Export</span>
             </a>
