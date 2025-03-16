@@ -30,28 +30,31 @@ class WacampaignsContentComponent extends Component
 
         $post = Wa_campaigns::where('uuid','=',$id)->first();
         if($post){
-            if($post->file == "" || $post->content == ""){
-            $content = Wa_templates::where('id','=', $post->wa_templates_id)->first();
-            $this->watemplates = $content;
-                if($content){
-                    $this->wacampaigns = $post;
-                    if($post->content == ""){
-                        $this->wacampaigns->content = $content->content;
-                    }
-                    if($post->file == ""){
-                        $this->wacampaigns->file = $content->file;
-                        $this->wacampaigns->type = $content->type;
-                    }
-                    $this->fill($this->wacampaigns->toArray());
-                }else{
-                    return abort(404);
-                }
-            }else{
-                $content = Wa_templates::where('id','=', $post->wa_templates_id)->first();
-                $this->watemplates = $content;
-                $this->wacampaigns = $post;
-                $this->fill($this->wacampaigns->toArray());
-            }
+            // if($post->file == "" || $post->content == ""){
+            // $content = Wa_templates::where('id','=', $post->wa_templates_id)->first();
+            // $this->watemplates = $content;
+            //     if($content){
+            //         $this->wacampaigns = $post;
+            //         if($post->content == ""){
+            //             $this->wacampaigns->content = $content->content;
+            //         }
+            //         if($post->file == ""){
+            //             $this->wacampaigns->file = $content->file;
+            //             $this->wacampaigns->type = $content->type;
+            //         }
+            //         $this->fill($this->wacampaigns->toArray());
+            //     }else{
+            //         return abort(404);
+            //     }
+            // }else{
+            //     $content = Wa_templates::where('id','=', $post->wa_templates_id)->first();
+            //     $this->watemplates = $content;
+            //     $this->wacampaigns = $post;
+            //     $this->fill($this->wacampaigns->toArray());
+            // }
+            $this->wacampaigns = $post;
+            $this->fill($this->wacampaigns->toArray());
+
         }else{
             return abort(404);
         }
@@ -70,14 +73,14 @@ class WacampaignsContentComponent extends Component
                 $this->wacampaigns->save();
             }else{
                 $this->wacampaigns->content = $this->content;
-                $this->wacampaigns->file = $this->watemplates->file;
-                $this->wacampaigns->type = $this->watemplates->type;
+                // $this->wacampaigns->file = $this->watemplates->file;
+                // $this->wacampaigns->type = $this->watemplates->type;
                 $this->wacampaigns->save();
             }
         }else{
             $this->wacampaigns->content = $this->content;
-            $this->wacampaigns->file = $this->watemplates->file;
-            $this->wacampaigns->type = $this->watemplates->type;
+            // $this->wacampaigns->file = $this->watemplates->file;
+            // $this->wacampaigns->type = $this->watemplates->type;
             $this->wacampaigns->save();
         }
 

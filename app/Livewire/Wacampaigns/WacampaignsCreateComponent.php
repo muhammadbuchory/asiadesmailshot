@@ -51,11 +51,16 @@ class WacampaignsCreateComponent extends Component implements HasActions, HasFor
 
         ]);
 
+        $templatecontent = Wa_templates::where('id','=', $validated['template_id'])->first();
+
         $wacampaigns = Wa_campaigns::make();
         $wacampaigns->name = $validated['name'];
         $wacampaigns->uuid = Str::uuid()->toString();;
         $wacampaigns->email_list_id = $validated['email_list_id'];
         $wacampaigns->wa_templates_id = $validated['template_id'];
+        $wacampaigns->content = $templatecontent->content;
+        $wacampaigns->file = $templatecontent->file;
+        $wacampaigns->type = $templatecontent->type;
         $wacampaigns->senders_class = "all";
         $wacampaigns->segment_class = 'Spatie\Mailcoach\Domain\Audience\Support\Segments\EverySubscriberSegment';
         $wacampaigns->status = "draft";

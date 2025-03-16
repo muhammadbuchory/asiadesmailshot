@@ -173,7 +173,6 @@ class WacampaignsListComponent extends TableComponent
 
     public function duplicateWacampaigns(Wa_campaigns $wacampaigns)
     {
-        
         $wanewcampaigns = Wa_campaigns::make();
         $wanewcampaigns->name = 'Duplicate '.$wacampaigns->name;
         $wanewcampaigns->uuid = Str::uuid()->toString();;
@@ -186,6 +185,7 @@ class WacampaignsListComponent extends TableComponent
         $wanewcampaigns->schedule_at = $wacampaigns->schedule_at;
         $wanewcampaigns->content = $wacampaigns->content;
         $wanewcampaigns->file = $wacampaigns->file;
+        $wanewcampaigns->type = $wacampaigns->type;
         $wanewcampaigns->status = "draft";
         $wanewcampaigns->save();
 
