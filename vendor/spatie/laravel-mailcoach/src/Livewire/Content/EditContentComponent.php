@@ -136,50 +136,29 @@ class EditContentComponent extends Component
         $this->dispatch('saveContent');
 
         foreach ($this->content as $uuid => $item) {
-            
-            //  $splithtml = explode('</head>', $item['html']);
-            //  dd($splithtml);
-             
-            //  $html = join("</head><span>test data preview text</span>", Array($splithtml));
-            //  $html = str_replace("</head>", "</head><span>test data preview text</span>", $item['html']);
-            
-            // $dom = new DOMDocument();
-            // @$dom->loadHTML($item['html'], LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
-            // // Cari tag <body>
-            // $body = $dom->getElementsByTagName('body')->item(0);
-            // // Buat elemen <span> baru
-            // $span = $dom->createElement('span', 'Ini adalah span yang disisipkan setelah body');
-            // $body->appendChild($span);
-            // $result = $dom->saveHTML();
-
-            // $newSpan = '
-            // <div style="display:none;">'.(isset($item['preview_text']) ? $item['preview_text'] : "" ).'</div>';
-            // $html = preg_replace('/(<body[^>]*>)/', '$1' . $newSpan, $item['html']);
-            // DB::enableQueryLog();
-            $send = $this->contentItems->firstWhere('uuid', $uuid)->update([
+            $this->contentItems->firstWhere('uuid', $uuid)->update([
                 'subject' => $item['subject'],
-                'preview_text' => (isset($item['preview_text']) ? $item['preview_text'] : "" ),
-                // 'html' => $html
+                'preview_text' => (isset($item['preview_text']) ? $item['preview_text'] : "" )
             ]);
-            // dd(DB::getQueryLog());
-            // dd($this->contentItems->firstWhere('uuid', $uuid));
         }
     }
 
     public function autosave()
     {
+
         if ($this->lastSavedAt && $this->lastSavedAt->timestamp !== $this->model->fresh()->updated_at->timestamp) {
             $this->autosaveConflict = true;
 
             return;
         }
 
-        // $this->dispatch('saveContentQuietly');
+        $this->dispatch('saveContentQuietly');
     }
 
     #[On('editorSavedQuietly')]
     public function onSavedQuietly()
     {
+ 
         $this->model->touch();
         $this->lastSavedAt = $this->model->updated_at;
         $this->autosaveConflict = false;
@@ -188,9 +167,21 @@ class EditContentComponent extends Component
     #[On('editorSaved')]
     public function notifySave(): void
     {
+
         once(function () {
             notify(__mc(':name was updated.', ['name' => $this->model->fresh()->name]));
         });
+
+        $newcontent = $this->model->contentItems->first();
+        $replace = '/<div\s+style="display:none;">.*?<\/div>/';
+        $result = preg_replace('/<div\s+style="display:none;">.*?<\/div>/', '', $newcontent->html);
+
+        $newSpan = '
+        <div style="display:none;">'.(isset($newcontent->preview_text) ? $newcontent->preview_text : "" ).'</div>';
+        $html = preg_replace('/(<body[^>]*>)/', '$1' . $newSpan, $result);
+        $send = $newcontent->firstWhere('uuid', $newcontent->uuid)->update([
+            'html' => $html
+        ]);
     }
 
     #[On('editorUpdated')]

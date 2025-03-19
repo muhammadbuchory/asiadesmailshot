@@ -1,3 +1,20 @@
+@push('endHead')
+<style>
+    .card-grid {
+        flex-grow: 1;
+        display: grid;
+        row-gap: 1rem;
+        max-width: 100%;
+        grid-template-columns: 35% 35%;
+    }
+
+    @media (min-width: 768px) {
+      .card {
+          padding: 2rem;
+      }
+    }
+</style>
+@endpush
 <x-mailcoach::card
     wire:poll.20s="autosave"
     class="flex flex-col gap-y-4"
@@ -50,8 +67,6 @@
                     </div>
                 </div>
 
-
-                
                 <div class="form-grid" wire:ignore x-show="!collapsed" x-collapse>
                     <form
                         class="card-grid"

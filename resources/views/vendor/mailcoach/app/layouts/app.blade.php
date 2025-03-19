@@ -45,7 +45,7 @@
         <x-mailcoach::main-navigation/>
     @endunless
 
-    <main class="md:pt-10 relative z-1 w-full px-4.5 sm:px-8">
+    <main class="md:pt-3 relative z-1 w-full px-4.5 sm:px-8">
 
         <div class="flex-grow md:flex md:items-stretch md:gap-10 @unless(isset($fullWidth) && $fullWidth) max-w-full mx-auto @endunless">
             @unless(isset($hideNav) && $hideNav)

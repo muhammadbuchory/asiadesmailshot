@@ -9,6 +9,15 @@
                     readonly
                 />
 
+                @If($contentItem->preview_text)
+                <x-mailcoach::text-field
+                    name="subject"
+                    :label="__mc('Preview Text')"
+                    :value="$contentItem->preview_text"
+                    readonly
+                />
+                @endIf
+
                 <div>
                     <label class="label mb-3">{{ __mc('Preview') }}</label>
                     <div class="rounded border border-sand-bleak overflow-scroll max-h-[50rem]">

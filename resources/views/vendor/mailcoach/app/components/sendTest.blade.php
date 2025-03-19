@@ -10,6 +10,7 @@
         />
     @endif
     <x-mailcoach::text-field
+        autocomplete="on"
         :label="__mc('Test addresses')"
         :placeholder="__mc('Email(s) comma separated')"
         name="emails"
