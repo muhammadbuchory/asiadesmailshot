@@ -15,6 +15,7 @@
             @endif
         </div>
 
+
         @if (($create ?? false) || ($createComponent ?? false))
             <div class="buttons flex">
                 <x-mailcoach::button
@@ -27,8 +28,11 @@
                     </x-slot:icon>
                 </x-mailcoach::button>
 
+                {{-- {{ "test1" . (request()->routeIs('campaigns.*') ? "on" : "off") }} --}}
+                
+
                 <x-mailcoach::modal :title="$createText ?? __mc('Create ' . $create)"
-                                    name="create-{{ $create }}">
+                                    name="create-{{ $create }}" width="{{ request()->routeIs('mailcoach.campaigns') ? 'max-w-7xl' : 'max-w-sm' }}">
                     @if ($createComponent ?? '')
                         @livewire($createComponent, $createData ?? [])
                     @else

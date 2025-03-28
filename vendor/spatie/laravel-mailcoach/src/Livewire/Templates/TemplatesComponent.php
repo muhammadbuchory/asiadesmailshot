@@ -6,9 +6,12 @@ use Closure;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ImageColumn;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Spatie\Mailcoach\Domain\Template\Models\Template;
 use Spatie\Mailcoach\Livewire\TableComponent;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class TemplatesComponent extends TableComponent
 {
@@ -31,10 +34,20 @@ class TemplatesComponent extends TableComponent
                 ->searchable(self::getTemplateClass()::count() > $this->getTableRecordsPerPageSelectOptions()[0])
                 ->size('base')
                 ->extraAttributes(['class' => 'link']),
-            // TextColumn::make('html')
-            //     ->label(__mc('Preview'))
-            //     ->html()
-            //     ->wrap(),
+            ImageColumn::make('preview')
+                ->defaultImageUrl(
+                    fn ($record) => Storage::exists('public/template/'.Str::slug($record->name).'.jpg') 
+                    ? asset('storage/template/'.Str::slug($record->name).'.jpg')
+                    : url('images/notfound.png')
+                )
+                ->url(
+                    fn ($record) => Storage::exists('public/template/'.Str::slug($record->name).'.jpg') 
+                    ? asset('storage/template/'.Str::slug($record->name).'.jpg')
+                    : url('images/notfound.png')  
+                )
+                ->openUrlInNewTab()
+                ->height('auto')
+                ->width(200),
             TextColumn::make('created_at')
                 ->label(__mc('Created'))
                 ->date(config('mailcoach.date_format'), config('mailcoach.timezone'))

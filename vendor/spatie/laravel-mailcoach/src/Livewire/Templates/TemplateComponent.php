@@ -18,6 +18,11 @@ use Spatie\Mailcoach\Domain\Template\Models\Template as TemplateModel;
 use Spatie\Mailcoach\Domain\Template\Support\TemplateRenderer;
 use Spatie\Mailcoach\Domain\TransactionalMail\Models\TransactionalMail;
 use Spatie\Mailcoach\Mailcoach;
+use Barryvdh\Snappy\Facades\SnappyImage;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
+
 
 class TemplateComponent extends Component
 {
@@ -46,6 +51,7 @@ class TemplateComponent extends Component
         $this->validate();
 
         $this->dispatch('saveContent');
+
     }
 
     #[On('editorSaved')]
@@ -55,8 +61,71 @@ class TemplateComponent extends Component
 
         $this->template->name = $this->name;
         $this->template->save();
-
+        
         $this->reRenderEmailsUsingTemplate();
+
+            $name = Str::slug($this->name).'.jpg';
+            $fullPath = storage_path('app/public/template/' . $name);
+
+            if (Storage::exists('public/template/'.$name)) {
+                Storage::delete('public/template/'.$name);
+            }
+
+            $html = $this->html;
+
+            $html = preg_replace_callback(
+                '/<img[^>]+src="(https?:\/\/[^"]+)"[^>]*>/i',
+                function($matches) {
+                    try {
+                        $imageUrl = $matches[1];
+                        $imageData = Http::timeout(120)->get($imageUrl)->body();
+                        $extension = pathinfo($imageUrl, PATHINFO_EXTENSION) ?: 'jpg';
+                        return str_replace(
+                            $imageUrl, 
+                            'data:image/'.$extension.';base64,'.base64_encode($imageData), 
+                            $matches[0]
+                        );
+                    } catch (\Exception $e) {
+                        Log::error("Failed to fetch image: {$matches[1]} - {$e->getMessage()}");
+                        return str_replace($matches[1], public_path('placeholder.jpg'), $matches[0]);
+                    }
+                },
+                $html
+            );
+
+            $html = preg_replace_callback(
+                '/<link[^>]+href="(https?:\/\/fonts\.googleapis\.com[^"]+)"[^>]*>/i',
+                function($matches) {
+                    try {
+                        $fontUrl = $matches[1];
+                        $cssContent = Http::timeout(30)->get($fontUrl)->body();
+                        
+                        $cssContent = preg_replace_callback(
+                            '/url\((https?:\/\/[^)]+)\)/i',
+                            function($fontMatches) {
+                                try {
+                                    $fontData = Http::timeout(30)->get($fontMatches[1])->body();
+                                    return 'url(data:font/woff2;base64,'.base64_encode($fontData).')';
+                                } catch (\Exception $e) {
+                                    Log::error("Failed to fetch font: {$fontMatches[1]}");
+                                    return $fontMatches[0]; 
+                                }
+                            },
+                            $cssContent
+                        );
+                        
+                        return '<style>'.$cssContent.'</style>';
+                    } catch (\Exception $e) {
+                        Log::error("Failed to fetch Google Font: {$matches[1]} - {$e->getMessage()}");
+                        return ''; 
+                    }
+                },
+                $html
+            );
+
+            SnappyImage::loadHTML($html)
+                ->setOption('width', 1280)
+                ->save($fullPath);
 
         notify(__mc('Template :template was updated.', ['template' => $this->template->name]));
     }
